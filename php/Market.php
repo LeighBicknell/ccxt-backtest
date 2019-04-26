@@ -47,6 +47,32 @@ class Market
         reset($this->ohlcvv);
     }
 
+
+    /**
+     * Getter for $ohlcvv
+     *
+     * return mixed
+     * @access public
+     */
+    public function getOhlcvv()
+    {
+        return $this->ohlcvv;
+    }
+
+    /**
+     * Setter for ohlcvv
+     *
+     * @param mixed $ohlcvv Set $ohlcvv
+     *
+     * @return self
+     * @access public
+     */
+    public function setOhlcvv($ohlcvv)
+    {
+        $this->ohlcvv = $ohlcvv;
+        return $this;
+    }
+
     /**
      * Getter for $id
      *

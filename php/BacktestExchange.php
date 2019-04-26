@@ -289,7 +289,7 @@ class BacktestExchange extends Exchange
 
     public function fetchOHLCV($symbol, $timeframe = 'default', $since = null, $limit = null, $params = array ())
     {
-
+        throw new NotSupported($this->id . ' API does not support fetchOHLCV');
     }
 
     /**
