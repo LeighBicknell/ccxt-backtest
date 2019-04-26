@@ -331,7 +331,7 @@ class BacktestExchange extends Exchange
      */
     protected function processBacktestOrders()
     {
-        foreach ($orders as $k => $order) {
+        foreach ($this->backtestOrders as $k => $order) {
             $market = $this->getMarket($order->getSymbol());
             $order->process($market, $this->getBacktestWallet($market->getQuote()), $this->getBacktestWallet($market->getBase()));
         }
