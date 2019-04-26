@@ -1,0 +1,20 @@
+{
+    "name": "flickerbean/ccxt-backtest",
+    "description": "PHP CCXT Backtesting library",
+    "type": "library",
+    "require": {
+        "ccxt/ccxt": "^1.18"
+    },
+    "autoload": {
+        "psr-4" : {
+            "ccxt\\backtest" : "php/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Leigh Bicknell",
+            "email": "leigh@leighbicknell.com"
+        }
+    ]
+}
