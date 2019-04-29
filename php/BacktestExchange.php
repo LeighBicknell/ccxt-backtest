@@ -34,6 +34,13 @@ class BacktestExchange extends Exchange
         }
     }
 
+    public function setBacktestWallets(array $wallets)
+    {
+        foreach ($wallets as $k => $wallet) {
+            $this->backtestWallets[$wallet->getName()] = $wallet;
+        }
+    }
+
     public function describe() {
         return array_replace_recursive (parent::describe (), array (
             'id' => 'backtest',
@@ -196,39 +203,6 @@ class BacktestExchange extends Exchange
         );
     }
 
-    public function fetchBalance($params = array())
-    {
-        /* @TODO
-         *
-            indexed by availability of funds first, then by currency
-
-            'free':  {           // money, available for trading, by currency
-                'BTC': 321.00,   // floats...
-                'USD': 123.00,
-                ...
-            },
-
-            'used':  { ... },    // money on hold, locked, frozen, or pending, by currency
-
-            'total': { ... },    // total (free + used), by currency
-
-            //-------------------------------------------------------------------------
-            // indexed by currency first, then by availability of funds
-
-            'BTC':   {           // string, three-letter currency code, uppercase
-                'free': 321.00   // float, money available for trading
-                'used': 234.00,  // float, money on hold, locked, frozen or pending
-                'total': 555.00, // float, total balance (free + used)
-            },
-
-            'USD':   {           // ...
-                'free': 123.00   // ...
-                'used': 456.00,
-                'total': 579.00,
-            },
-        */
-    }
-
     public function cancelOrder($id, $symbol = null, $params = array())
     {
         $order = $this->getOrderById($id);
@@ -236,6 +210,20 @@ class BacktestExchange extends Exchange
         return $this->parseOrder($order);
     }
 
+    /**
+     * createOrder
+     *
+     * @param mixed $symbol
+     * @param mixed $type
+     * @param mixed $side
+     * @param mixed $amount BASE CURRENCY (BTC in BTC/USD)
+     * @param mixed $price
+     * @param array $params
+     *
+     * @return void
+     * @throws [ExceptionClass] [Description]
+     * @access
+     */
     public function createOrder($symbol, $type, $side, $amount, $price = null, $params = array())
     {
         // Validate parameters
@@ -249,12 +237,13 @@ class BacktestExchange extends Exchange
             throw new \InvalidArgumentException("$type order not supported");
         }
 
+        $market = $this->getBacktestMarket($symbol);
         $baseWallet = $this->getBacktestWallet($backtestMarket->getBase());
         $quoteWallet = $this->getBacktestWallet($backtestMarket->getQuote());
 
         // @TODO consider a factory when we start supporting different order
         // types
-        $order = new LimitOrder($quoteWallet, $baseWallet, $symbol, $type, $side, $amount, $price, $params);
+        $order = new LimitOrder($market, $quoteWallet, $baseWallet, $symbol, $side, $amount, $price, $params);
 
         $this->backtestOrders[$order->getId()] = $order;
         return $this->parseOrder($order);
@@ -313,12 +302,39 @@ class BacktestExchange extends Exchange
 
     public function __call($name, $args = array())
     {
-        $name = str_replace('_', '', ucwords($key, '_'));
+        $name = str_replace('_', '', ucwords($name, '_'));
         if (method_exists($this, $name)) {
             return call_user_func_array($name, $args);
         }
 
         throw new NotSupported($this->id . ' API does not support '.$name);
+    }
+
+    public function fetchBalance($params = array())
+    {
+        $data = array();
+        foreach ($this->backtestOrders as $id => $order) {
+            $name = $order->getLockedWallet()->getName();
+            if (!isset($data['used'][$name])) {
+                $data['used'][$name] = 0;
+                $data[$name]['used'] = 0;
+            }
+            $data['used'][$name] += $order->getLockedAmount();
+            $data[$name]['used'] += $order->getLockedAmount();
+        }
+
+        foreach ($this->backtestWallets as $name => $wallet) {
+            if (!isset($data['used'][$name])) {
+                $data['used'][$name] = 0;
+                $data[$name]['used'] = 0;
+            }
+            $data['free'][$name] = $wallet->getQuantity();
+            $data[$name]['free'] = $wallet->getQuantity();
+            $data['total'][$name] = $data[$name]['free'] + $data[$name]['used'];
+            $data[$name]['total'] = $data['total'][$name];
+        }
+
+        return $data;
     }
 
     /**
@@ -333,7 +349,7 @@ class BacktestExchange extends Exchange
     protected function processBacktestOrders()
     {
         foreach ($this->backtestOrders as $k => $order) {
-            $market = $this->getMarket($order->getSymbol());
+            $market = $this->getBacktestMarket($order->getSymbol());
             $order->process($market, $this->getBacktestWallet($market->getQuote()), $this->getBacktestWallet($market->getBase()));
         }
     }
@@ -350,6 +366,9 @@ class BacktestExchange extends Exchange
 
     protected function getBacktestWallet($wallet)
     {
+        if (!isset($this->backtestWallets[$wallet])) {
+            throw new \InvalidArgumentException("Wallet $wallet does not exist");
+        }
         return $this->backtestWallets[$wallet];
     }
 }

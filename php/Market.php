@@ -39,12 +39,22 @@ class Market
 
     public function increment()
     {
-        next($this->ohlcvv);
+        // If we're already on the last one, return false but leave our pointer
+        // where it is
+        if (key($this->ohlcvv) === (count($this->ohlcvv) - 1)) {
+            return false;
+        }
+        return next($this->ohlcvv);
     }
 
     public function reset()
     {
-        reset($this->ohlcvv);
+        return reset($this->ohlcvv);
+    }
+
+    public function key()
+    {
+        return key($this->ohlcvv);
     }
 
 

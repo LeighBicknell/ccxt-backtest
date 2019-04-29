@@ -25,7 +25,7 @@ abstract class Order
     protected $timestamp;
     protected $datetime;
     protected $lastTradeTimestamp;
-    protected $status;
+    protected $status; // open, closed, cancelled
     protected $symbol;
     protected $type;
     protected $side;
@@ -432,5 +432,33 @@ abstract class Order
     {
         $this->fee = $fee;
         return $this;
+    }
+
+    /**
+     * Returns the amount of funds locked up in an order,
+     *
+     * Not all orders actually lock funds. A stop limit order for example.
+     *
+     * @return float
+     */
+    public function getLockedAmount()
+    {
+        return 0;
+    }
+
+    public function getLockedWallet()
+    {
+        if ($this->getSide() == 'sell') {
+            return $this->baseWallet;
+        }
+        return $this->quoteWallet;
+    }
+
+    public function isActive()
+    {
+        if ($this->getStatus() == 'open') {
+            return true;
+        }
+        return false;
     }
 }

@@ -2,24 +2,26 @@
 
 namespace ccxt\backtest;
 
+use ccxt\InsufficientFunds;
+
 class LimitOrder extends Order
 {
 
     protected function init()
     {
-        $wallet = $baseWallet;
-        if ($this->getSide() == 'buy') {
-            $wallet = $quoteWallet;
-        }
+        $this->setStatus('open');
 
-        if ($wallet->getQuantity() < $this->getAmount()) {
+        $wallet = $this->getLockedWallet();
+        $decrementAmount = $this->getLockedAmount();
+
+        if ($wallet->getQuantity() < $decrementAmount) {
             throw new InsufficientFunds();
         }
 
         // @TODO implement minimum order test
 
-        $wallet->decrement($amount);
-        $this->setStatus('open');
+
+        $wallet->decrement($decrementAmount);
     }
 
     public function process()
@@ -44,12 +46,16 @@ class LimitOrder extends Order
         // of the logic for us.
         // Or we could allow passing in of an executable that contains the
         // logic. Or maybe something else.
-        if ($this->market->getCandleMin() >= $this->getPrice()) {
+        if ($this->market->getCandleLow() >= $this->getPrice()) {
             return false;
         }
 
+        // @FIXME If user creates a limit buy at a price way above the current
+        // market price, it is essentially just a market order, and should be
+        // filled at current price
+
         // If we got this far the order has been filled
-        $this->setStatus('filled');
+        $this->setStatus('closed');
         $filled = $this->getAmount();
         $this->baseWallet->increment($filled);
         $this->setFilled($filled);
@@ -60,16 +66,15 @@ class LimitOrder extends Order
         $candle = $this->market->getCandle();
         // @TODO come up with a better way of customizing this logic without
         // having to extend our Orders once again
-        // We could pass in a 'BacktestingOrderLogic' class which handles all
         // of the logic for us.
         // Or we could allow passing in of an executable that contains the
         // logic. Or maybe something else.
-        if ($this->market->getCandleMax() <= $this->getPrice()) {
+        if ($this->market->getCandleHigh() <= $this->getPrice()) {
             return false;
         }
 
         // If we got this far the order has been filled
-        $this->setStatus('filled');
+        $this->setStatus('closed');
         $filled = $this->getAmount() * $this->getPrice();
         $this->quoteWallet->increment($filled);
         $this->setFilled($filled);
@@ -92,5 +97,16 @@ class LimitOrder extends Order
         }
 
         return $this;
+    }
+
+    public function getLockedAmount()
+    {
+        if (!$this->isActive()) {
+            return 0;
+        }
+        if ($this->getSide() == 'sell') {
+            return $this->getAmount();
+        }
+        return $this->getAmount() * $this->getPrice();
     }
 }
