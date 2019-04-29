@@ -226,10 +226,10 @@ class Market
     /**
      * Getter for $active
      *
-     * return mixed
+     * return bool
      * @access public
      */
-    public function getActive()
+    public function isActive()
     {
         return $this->active;
     }
@@ -303,8 +303,8 @@ class Market
         return array(
             'symbol' => $this->getSymbol(),
             'timestamp' => $this->getCandleTimestamp(),
-            'high' => $this->getCandle[0],
-            'low' => $this->getCandle['l'],
+            'high' => $this->getCandleHigh(),
+            'low' => $this->getCandleLow(),
             'bid' => $this->getCandleClose(),
             'bidVolume' => null,
             'ask' => $this->getCandleClose(),
@@ -318,7 +318,7 @@ class Market
             'percentage' => null,
             'average' => null,
             'baseVolume' => $this->getCandleBaseVolume(),
-            'quoteVolume' => $this->getCandleQuoteVolume()
+            //'quoteVolume' => $this->getCandleQuoteVolume()
         );
     }
 
@@ -336,12 +336,12 @@ class Market
         $candle = $this->getCandle();
         return $candle[1];
     }
-    public function getCandleMax()
+    public function getCandleHigh()
     {
         $candle = $this->getCandle();
         return $candle[2];
     }
-    public function getCandleMin()
+    public function getCandleLow()
     {
         $candle = $this->getCandle();
         return $candle[3];
@@ -358,6 +358,7 @@ class Market
     }
     public function getCandleQuoteVolume()
     {
+        // @FIXME
         $candle = $this->getCandle();
         return $candle[6];
     }

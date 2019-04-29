@@ -14,9 +14,6 @@ class BacktestExchange extends Exchange
     public function __construct($options = array())
     {
         parent::__construct($options = array());
-        // Load the markets so we don't have to do it at the top of all of the
-        // method calls
-        $this->loadMarkets();
     }
 
     /**
@@ -30,10 +27,10 @@ class BacktestExchange extends Exchange
      * @throws [ExceptionClass] [Description]
      * @access
      */
-    public function setMarkets(array $markets)
+    public function setBacktestMarkets(array $markets)
     {
-        foreach ($markets as $k => $v) {
-            $this->backtestMarkets[$v->getSymbol()] = $market;
+        foreach ($markets as $k => $market) {
+            $this->backtestMarkets[$market->getSymbol()] = $market;
         }
     }
 
@@ -130,7 +127,7 @@ class BacktestExchange extends Exchange
     public function parseTicker($ticker, $market = null)
     {
         $symbol = $ticker['symbol'];
-        $timestamp = $this->parse8601($ticker['timestamp']);
+        $timestamp = $ticker['timestamp'];
         $baseVolume = $this->safe_float($ticker, 'baseVolume');
         $quoteVolume = $this->safe_float($ticker, 'volumeQuote');
         $open = $this->safe_float($ticker, 'open');
@@ -263,7 +260,7 @@ class BacktestExchange extends Exchange
         return $this->parseOrder($order);
     }
 
-    public function fetchMarkets()
+    public function fetch_markets($params = array())
     {
         $results = array();
         foreach ($this->backtestMarkets as $market) {
@@ -280,11 +277,6 @@ class BacktestExchange extends Exchange
             );
         }
         return $results;
-    }
-
-    public function loadMarkets()
-    {
-        return $this->load_markets();
     }
 
     public function fetchOHLCV($symbol, $timeframe = 'default', $since = null, $limit = null, $params = array ())
