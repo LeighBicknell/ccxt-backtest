@@ -294,12 +294,21 @@ class BacktestExchange extends Exchange
      */
     public function increment($count = 1)
     {
+        $success = false;
         // Move each of the markets forwards one candle
         foreach ($this->backtestMarkets as $market) {
-            $market->increment();
+            if ($market->isActive()) {
+                if (false === $market->increment()) {
+                    $market->setActive(false);
+                } else {
+                    // We've successfully advanced at least one market
+                    $success = true;
+                }
+            }
         }
         // Now calculate any triggered orders and update wallet values
         $this->processBacktestOrders();
+        return $success;
     }
 
     public function __call($name, $args = array())
