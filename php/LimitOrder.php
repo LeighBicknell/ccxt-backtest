@@ -40,6 +40,7 @@ class LimitOrder extends Order
     protected function processBuy()
     {
         $candle = $this->market->getCandle();
+
         // @TODO come up with a better way of customizing this logic without
         // having to extend our Orders once again
         // We could pass in a 'BacktestingOrderLogic' class which handles all
@@ -47,6 +48,7 @@ class LimitOrder extends Order
         // Or we could allow passing in of an executable that contains the
         // logic. Or maybe something else.
         if ($this->market->getCandleLow() >= $this->getPrice()) {
+
             return false;
         }
 
@@ -59,6 +61,18 @@ class LimitOrder extends Order
         $filled = $this->getAmount();
         $this->baseWallet->increment($filled);
         $this->setFilled($filled);
+        echo "Filled buy $filled\r\n";
+
+        // DEBUG
+        echo "\r\n<pre><!-- \r\n";
+        $DBG_DBG = debug_backtrace();
+        foreach ($DBG_DBG as $DD) {
+            echo implode(':', array(@$DD['file'], @$DD['line'], @$DD['function'])) . "\r\n";
+        }
+        echo " -->\r\n";
+        var_dump($this->market->getTicker());
+        echo "</pre>\r\n";
+
     }
 
     protected function processSell()
@@ -78,6 +92,18 @@ class LimitOrder extends Order
         $filled = $this->getAmount() * $this->getPrice();
         $this->quoteWallet->increment($filled);
         $this->setFilled($filled);
+        echo "Filled sell $filled\r\n";
+
+        // DEBUG
+        echo "\r\n<pre><!-- \r\n";
+        $DBG_DBG = debug_backtrace();
+        foreach ($DBG_DBG as $DD) {
+            echo implode(':', array(@$DD['file'], @$DD['line'], @$DD['function'])) . "\r\n";
+        }
+        echo " -->\r\n";
+        var_dump($this->market->getTicker());
+        echo "</pre>\r\n";
+
     }
 
     public function cancel()

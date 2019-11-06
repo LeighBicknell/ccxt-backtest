@@ -246,6 +246,7 @@ class BacktestExchange extends Exchange
         $order = new LimitOrder($market, $quoteWallet, $baseWallet, $symbol, $side, $amount, $price, $params);
 
         $this->backtestOrders[$order->getId()] = $order;
+
         return $this->parseOrder($order);
     }
 
@@ -350,7 +351,7 @@ class BacktestExchange extends Exchange
     {
         foreach ($this->backtestOrders as $k => $order) {
             $market = $this->getBacktestMarket($order->getSymbol());
-            $order->process($market, $this->getBacktestWallet($market->getQuote()), $this->getBacktestWallet($market->getBase()));
+            $order->process();
         }
     }
 
@@ -359,16 +360,26 @@ class BacktestExchange extends Exchange
         return $this->backtestOrders[$id];
     }
 
-    protected function getBacktestMarket($symbol)
+    public function getBacktestMarket($symbol)
     {
         return $this->backtestMarkets[$symbol];
     }
 
-    protected function getBacktestWallet($wallet)
+    public function getBacktestWallet($wallet)
     {
         if (!isset($this->backtestWallets[$wallet])) {
             throw new \InvalidArgumentException("Wallet $wallet does not exist");
         }
         return $this->backtestWallets[$wallet];
+    }
+
+    public function getBacktestWallets()
+    {
+        return $this->backtestWallets;
+    }
+
+    public function getBacktestOrders()
+    {
+        return $this->backtestOrders;
     }
 }
