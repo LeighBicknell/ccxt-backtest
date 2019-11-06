@@ -61,18 +61,6 @@ class LimitOrder extends Order
         $filled = $this->getAmount();
         $this->baseWallet->increment($filled);
         $this->setFilled($filled);
-        echo "Filled buy $filled\r\n";
-
-        // DEBUG
-        echo "\r\n<pre><!-- \r\n";
-        $DBG_DBG = debug_backtrace();
-        foreach ($DBG_DBG as $DD) {
-            echo implode(':', array(@$DD['file'], @$DD['line'], @$DD['function'])) . "\r\n";
-        }
-        echo " -->\r\n";
-        var_dump($this->market->getTicker());
-        echo "</pre>\r\n";
-
     }
 
     protected function processSell()
@@ -92,18 +80,6 @@ class LimitOrder extends Order
         $filled = $this->getAmount() * $this->getPrice();
         $this->quoteWallet->increment($filled);
         $this->setFilled($filled);
-        echo "Filled sell $filled\r\n";
-
-        // DEBUG
-        echo "\r\n<pre><!-- \r\n";
-        $DBG_DBG = debug_backtrace();
-        foreach ($DBG_DBG as $DD) {
-            echo implode(':', array(@$DD['file'], @$DD['line'], @$DD['function'])) . "\r\n";
-        }
-        echo " -->\r\n";
-        var_dump($this->market->getTicker());
-        echo "</pre>\r\n";
-
     }
 
     public function cancel()
