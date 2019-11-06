@@ -3,7 +3,8 @@
     "description": "PHP CCXT Backtesting library",
     "type": "library",
     "require": {
-        "ccxt/ccxt": "^1.18"
+        "ccxt/ccxt": "^1.18",
+        "ghunti/highcharts-php": "^3.0"
     },
     "autoload": {
         "psr-4" : {
