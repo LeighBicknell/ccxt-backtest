@@ -36,27 +36,30 @@ class Market
         ];
          */
     protected $ohlcvv = array();
+    protected $currentKey = 0;
 
     public function increment()
     {
         // If we're already on the last one, return false but leave our pointer
         // where it is
-        if (key($this->ohlcvv) === (count($this->ohlcvv) - 1)) {
+        if ($this->currentKey >= count($this->ohlcvv) - 1) {
             return false;
         }
-        return next($this->ohlcvv);
+        $current = $this->ohlcvv[$this->currentKey];
+        $this->currentKey++;
+        return $current;
     }
 
     public function reset()
     {
-        return reset($this->ohlcvv);
+        $this->currentKey = 0;
+        return $this->ohlcvv[0];
     }
 
     public function key()
     {
-        return key($this->ohlcvv);
+        return $this->currentKey;
     }
-
 
     /**
      * Getter for $ohlcvv
@@ -64,9 +67,30 @@ class Market
      * return mixed
      * @access public
      */
-    public function getOhlcvv()
+    public function getOhlcvv($since = null, $limit = null, $restrict_to_past = false)
     {
-        return $this->ohlcvv;
+        // If we have no restrictions just return the lot
+        if (!$since && !$limit && !$restrict_to_past) {
+            return $this->ohlcvv;
+        }
+
+        // Filter our candles
+        $ohlcvv = [];
+        foreach ($this->olhcvv as $k => $v) {
+            if ($since && $v[0] < $since) {
+                continue;
+            }
+            if ($limit && count($ohlcvv) > $limit) {
+                break;
+            }
+            if ($restrict_to_past && $k > $this->currentKey) {
+                break;
+            }
+
+            $ohlcvv[] = $v;
+        }
+
+        return $ohlcvv;
     }
 
     /**
@@ -334,7 +358,7 @@ class Market
 
     public function getCandle()
     {
-        return current($this->ohlcvv);
+        return $this->ohlcvv[$this->currentKey];
     }
     public function getCandleTimestamp()
     {

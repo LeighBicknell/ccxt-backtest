@@ -46,9 +46,11 @@ class ChartRenderer
         }
 
         // Structure the orders data
-        $orders = [];
+        $orders = ['buy' => [], 'sell' => []];
         foreach ($exchange->getBacktestOrders() as $order) {
-            if ($order->getMarket() == $market) {
+
+
+            if ($order->getMarket() == $market && $order->getStatus() == 'closed') {
                 $orders[$order->getSide()][] = [
                     'x' => $order->getLastTradeTimestamp(),
                     'title' => $order->getSide(),
@@ -58,13 +60,14 @@ class ChartRenderer
                 ];
             }
         }
+
+
         usort($orders['buy'], function ($a, $b) {
             return $a['x'] - $b['x'];
         });
         usort($orders['sell'], function ($a, $b) {
             return $a['x'] - $b['x'];
         });
-
 
 
 

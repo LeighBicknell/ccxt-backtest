@@ -79,6 +79,7 @@ class BacktestExchange extends Exchange
                 'fetchMyTrades' => false,
                 'fetchOHLCV' => false,
                 'fetchOrder' => true,
+                'fetchOrders' => true,
                 'fetchOpenOrders' => false,
                 'fetchTickers' => true,
                 'withdraw' => false,
@@ -204,6 +205,27 @@ class BacktestExchange extends Exchange
         return $this->parseOrder($this->backtestOrders[$id]);
     }
 
+    public function fetchOrders($symbol = null, $since = null, $limit = null, $params = [])
+    {
+        $orders = [];
+        foreach ($this->backtestOrders as $k => $v) {
+            if ($symbol && $v->getSymbol() !== $symbol) {
+                continue;
+            }
+
+            if ($since && $order->getTimestamp() < $since) {
+                continue;
+            }
+
+            if ($limit && count($orders) > $limit) {
+                break;
+            }
+
+            $orders[] = $this->parseOrder($v);
+        }
+        return $orders;
+    }
+
     public function parseOrder($order)
     {
         return array(
@@ -228,6 +250,22 @@ class BacktestExchange extends Exchange
     public function cancelOrder($id, $symbol = null, $params = array())
     {
         $order = $this->getOrderById($id);
+        if (!$order) {
+
+            // DEBUG
+            echo "\r\n<pre><!-- \r\n";
+            $DBG_DBG = debug_backtrace();
+            foreach ($DBG_DBG as $DD) {
+                echo implode(':', array(@$DD['file'], @$DD['line'], @$DD['function'])) . "\r\n";
+            }
+            echo " -->\r\n";
+            var_dump('Order doesnt exist?!');
+            var_dump($id);
+            var_dump($this->backtestOrders[$id]);
+            echo "</pre>\r\n";
+            die();
+
+        }
         $order->cancel();
         return $this->parseOrder($order);
     }
@@ -304,7 +342,8 @@ class BacktestExchange extends Exchange
 
         $this->backtestOrders[$order->getId()] = $order;
 
-        return $this->parseOrder($order);
+        $parsedOrder = $this->parseOrder($order);
+        return $parsedOrder;
     }
 
     public function fetchMarkets($params = array())
@@ -332,9 +371,21 @@ class BacktestExchange extends Exchange
         return $this->fetchMarkets($params);
     }
 
+    /**
+     * fetchOHLCV
+     *
+     * @param string $symbol
+     * @param string $timeframe // @NOTE this does not work in backtests
+     * @param mixed $since
+     * @param mixed $limit
+     * @param array $params // @NOTE Not used in backtests
+     *
+     * @return array
+     * @access public
+     */
     public function fetchOHLCV($symbol, $timeframe = 'default', $since = null, $limit = null, $params = array ())
     {
-        throw new NotSupported($this->id . ' API does not support fetchOHLCV');
+        return $this->markets[$symbol]->getOhlcvv($since, $limit, true);
     }
 
     /**
@@ -412,7 +463,7 @@ class BacktestExchange extends Exchange
         }
     }
 
-    protected function getOrderById()
+    protected function getOrderById($id)
     {
         return $this->backtestOrders[$id];
     }
