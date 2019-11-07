@@ -2,7 +2,9 @@
 
 namespace ccxt\backtest;
 
+use ccxt\backtest\order\OrderFactory;
 use ccxt\Exchange;
+use ccxt\InvalidOrder;
 use ccxt\NotSupported;
 
 class BacktestExchange extends Exchange
@@ -11,8 +13,26 @@ class BacktestExchange extends Exchange
     protected $backtestWallets = array();
     protected $backtestMarkets = array();
 
-    public function __construct($options = array())
+    /**
+     * createMarketBuyOrderRequiresPrice
+     *
+     * @TODO Not yet implemented, but would be handy for backtesting against
+     * exchanges that use this.
+     *
+     * @var mixed
+     */
+    protected $createMarketBuyOrderRequiresPrice = false;
+
+    /**
+     * orderFactory
+     *
+     * @var OrderFactory
+     */
+    protected $orderFactory;
+
+    public function __construct(OrderFactory $orderFactory, $options = array())
     {
+        $this->orderFactory = $orderFactory;
         parent::__construct($options = array());
     }
 
@@ -106,6 +126,7 @@ class BacktestExchange extends Exchange
                 ),
                 'parseOrderStatus' => false,
                 'hasAlreadyAuthenticatedSuccessfully' => false, // a workaround for APIKEY_INVALID
+                'createMarketBuyOrderRequiresPrice' => $this->createMarketBuyOrderRequiresPrice,
             ),
             'commonCurrencies' => array (
                 'BITS' => 'SWIFT',
@@ -232,18 +253,54 @@ class BacktestExchange extends Exchange
             return false;
         }
 
-        $validTypes = array('limit');
-        if (!in_array($type, $validTypes)) {
-            throw new \InvalidArgumentException("$type order not supported");
+        if ($type === 'market') {
+            // for market buy it requires the $amount of quote currency to spend
+            if ($side === 'buy') {
+                if ($this->options['createMarketBuyOrderRequiresPrice']) {
+                    if ($price === null) {
+                        throw new InvalidOrder($this->id . " createOrder()
+                            requires the $price argument with market buy orders
+                            to calculate total order cost ($amount to spend),
+                            where cost = $amount * $price-> Supply a $price
+                            argument to createOrder() call if you want the cost
+                            to be calculated for you from $price and $amount,
+                            or, alternatively, add
+                            .options['createMarketBuyOrderRequiresPrice'] =
+                            false to supply the cost in the $amount argument
+                            (the exchange-specific behaviour)");
+                    } else {
+                        $amount = $amount * $price;
+                    }
+                }
+            }
         }
 
         $market = $this->getBacktestMarket($symbol);
         $baseWallet = $this->getBacktestWallet($backtestMarket->getBase());
         $quoteWallet = $this->getBacktestWallet($backtestMarket->getQuote());
 
-        // @TODO consider a factory when we start supporting different order
-        // types
-        $order = new LimitOrder($market, $quoteWallet, $baseWallet, $symbol, $side, $amount, $price, $params);
+        // If It's a limit buy/sell above/below the current price, execute a
+        // marketorder instead
+        if ($type === 'limit') {
+            // @TODO allow customization of currentPrice
+            $currentPrice = $market->getCandleClose();
+            if (($side == 'buy' && $currentPrice < $price) || ($side == 'sell' && $currentPrice > $price)) {
+                $type = 'market';
+                $price = null;
+            }
+        }
+
+        $order = $this->orderFactory->build(
+            $type,
+            $market,
+            $quoteWallet,
+            $baseWallet,
+            $symbol,
+            $side,
+            $amount,
+            $price,
+            $params
+        );
 
         $this->backtestOrders[$order->getId()] = $order;
 

@@ -52,7 +52,9 @@ class ChartRenderer
                 $orders[$order->getSide()][] = [
                     'x' => $order->getLastTradeTimestamp(),
                     'title' => $order->getSide(),
-                    'text' => "Amount: {$order->getAmount()}\r\n Cost: {$order->getCost()}\r\n"
+                    'text' => "Type: {$order->getType()}<br/>
+                                Amount: {$order->getAmount()}<br/>
+                                Cost: {$order->getCost()}<br/>"
                 ];
             }
         }
@@ -72,7 +74,7 @@ class ChartRenderer
         // Build the chart
         $chart = new Highchart(Highchart::HIGHSTOCK);
         $chart->chart->renderTo = $chartId;
-        $chart->title->text = "Backtest test";
+        $chart->title->text = $market->getSymbol();
 
         $chart->yAxis[] = [
             'labels' => [
@@ -97,13 +99,13 @@ class ChartRenderer
         $chart->series[] = [
             'id' => 'ohlc',
             'type' => "ohlc",
-            'name' => "BTC/USD Backtest",
+            'name' => $market->getSymbol()." Backtest",
             'data' => $ohlc,
         ];
         // volume
         $chart->series[] = [
             'type' => "column",
-            'name' => "BTC/USD Backtest",
+            'name' => $market->getSymbol()." Backtest",
             'data' => $volume,
             'yAxis' => 1
         ];

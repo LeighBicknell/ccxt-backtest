@@ -2,6 +2,7 @@
 
 use ccxt\backtest\BacktestExchange;
 use ccxt\backtest\MarketFactory;
+use ccxt\backtest\order\OrderFactory;
 use ccxt\backtest\renderer\ChartRenderer;
 use ccxt\backtest\Wallet;
 
@@ -17,7 +18,7 @@ $ohlcvv = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('2019-01-01'
 
 // Load the data into our backtesting exchange
 $testMarkets[$market['symbol']] = MarketFactory::buildFromCCXTMarket($market, $ohlcvv);
-$exchange = new BacktestExchange();
+$exchange = new BacktestExchange(new OrderFactory());
 $exchange->setBacktestMarkets($testMarkets);
 $exchange->loadMarkets();
 $usdWallet = new Wallet('USD', 20000);
@@ -39,7 +40,10 @@ while ($continue) {
     // If we have > $500
     if ($funds['free'][$market['quote']] >= 5000) {
         // Create a buy limit order
-        $orders['buy'][] = $exchange->createOrder($symbol, 'limit', 'buy', 1, 5000);
+        try {
+            $orders['buy'][] = $exchange->createOrder($symbol, 'market', 'buy', 1);
+        } catch (Exception $e) {
+        }
     } elseif ($funds['free'][$market['base']] > 1) {
         $orders['sell'][] = $exchange->createOrder($symbol, 'limit', 'sell', 1, 10000);
     }

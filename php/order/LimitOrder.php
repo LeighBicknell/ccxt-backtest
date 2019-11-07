@@ -1,9 +1,16 @@
 <?php
 
-namespace ccxt\backtest;
+namespace ccxt\backtest\order;
 
 use ccxt\InsufficientFunds;
 
+/**
+ * Class LimitOrder
+ *
+ * For a limit order $amount is the amount you want to buy/sell
+ *
+ * @see Order
+ */
 class LimitOrder extends Order
 {
     protected $type = 'limit';
@@ -12,7 +19,7 @@ class LimitOrder extends Order
     {
         $this->setStatus('open');
 
-        $wallet = $this->getLockedWallet();
+        $wallet = $this->getSpendWallet();
         $decrementAmount = $this->getLockedAmount();
 
         if ($wallet->getQuantity() < $decrementAmount) {
