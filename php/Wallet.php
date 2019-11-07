@@ -18,6 +18,20 @@ class Wallet
     protected $name;
     protected $quantity;
 
+    /**
+     * initialQuantity
+     *
+     * This is used purely for calculating profit/loss etc
+     *
+     * @var float
+     */
+    protected $initialQuantity;
+
+    public function __construct($name = '', $quantity = 0)
+    {
+        $this->name = $name;
+        $this->quantity = $this->inititalQuantity = $quantity;
+    }
 
     /**
      * Getter for $name

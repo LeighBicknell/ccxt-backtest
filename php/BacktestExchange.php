@@ -2,7 +2,9 @@
 
 namespace ccxt\backtest;
 
+use ccxt\backtest\order\OrderFactory;
 use ccxt\Exchange;
+use ccxt\InvalidOrder;
 use ccxt\NotSupported;
 
 class BacktestExchange extends Exchange
@@ -11,8 +13,26 @@ class BacktestExchange extends Exchange
     protected $backtestWallets = array();
     protected $backtestMarkets = array();
 
-    public function __construct($options = array())
+    /**
+     * createMarketBuyOrderRequiresPrice
+     *
+     * @TODO Not yet implemented, but would be handy for backtesting against
+     * exchanges that use this.
+     *
+     * @var mixed
+     */
+    protected $createMarketBuyOrderRequiresPrice = false;
+
+    /**
+     * orderFactory
+     *
+     * @var OrderFactory
+     */
+    protected $orderFactory;
+
+    public function __construct(OrderFactory $orderFactory, $options = array())
     {
+        $this->orderFactory = $orderFactory;
         parent::__construct($options = array());
     }
 
@@ -27,22 +47,23 @@ class BacktestExchange extends Exchange
      * @throws [ExceptionClass] [Description]
      * @access
      */
-    public function setBacktestMarkets(array $markets)
+    public function setBacktestMarkets(iterable $markets)
     {
         foreach ($markets as $k => $market) {
             $this->backtestMarkets[$market->getSymbol()] = $market;
         }
     }
 
-    public function setBacktestWallets(array $wallets)
+    public function setBacktestWallets(iterable $wallets)
     {
         foreach ($wallets as $k => $wallet) {
             $this->backtestWallets[$wallet->getName()] = $wallet;
         }
     }
 
-    public function describe() {
-        return array_replace_recursive (parent::describe (), array (
+    public function describe()
+    {
+        return array_replace_recursive(parent::describe(), array(
             'id' => 'backtest',
             'name' => 'BacktestExchange',
             'countries' => array ('US'),
@@ -105,6 +126,7 @@ class BacktestExchange extends Exchange
                 ),
                 'parseOrderStatus' => false,
                 'hasAlreadyAuthenticatedSuccessfully' => false, // a workaround for APIKEY_INVALID
+                'createMarketBuyOrderRequiresPrice' => $this->createMarketBuyOrderRequiresPrice,
             ),
             'commonCurrencies' => array (
                 'BITS' => 'SWIFT',
@@ -144,19 +166,19 @@ class BacktestExchange extends Exchange
         $average = null;
         if ($last !== null && $open !== null) {
             $change = $last - $open;
-            $average = $this->sum ($last, $open) / 2;
-            if ($open > 0)
+            $average = $this->sum($last, $open) / 2;
+            if ($open > 0) {
                 $percentage = $change / $open * 100;
+            }
         }
         $vwap = null;
-        if ($quoteVolume !== null)
-            if ($baseVolume !== null)
-                if ($baseVolume > 0)
-                    $vwap = $quoteVolume / $baseVolume;
+        if ($quoteVolume !== null && $baseVolume !== null && $baseVolume > 0) {
+            $vwap = $quoteVolume / $baseVolume;
+        }
         return array (
             'symbol' => $symbol,
             'timestamp' => $timestamp,
-            'datetime' => $this->iso8601 ($timestamp),
+            'datetime' => $this->iso8601($timestamp),
             'high' => $this->safe_float($ticker, 'high'),
             'low' => $this->safe_float($ticker, 'low'),
             'bid' => $this->safe_float($ticker, 'bid'),
@@ -221,8 +243,7 @@ class BacktestExchange extends Exchange
      * @param array $params
      *
      * @return void
-     * @throws [ExceptionClass] [Description]
-     * @access
+     * @access public
      */
     public function createOrder($symbol, $type, $side, $amount, $price = null, $params = array())
     {
@@ -232,25 +253,61 @@ class BacktestExchange extends Exchange
             return false;
         }
 
-        $validTypes = array('limit');
-        if (!in_array($type, $validTypes)) {
-            throw new \InvalidArgumentException("$type order not supported");
+        if ($type === 'market') {
+            // for market buy it requires the $amount of quote currency to spend
+            if ($side === 'buy') {
+                if ($this->options['createMarketBuyOrderRequiresPrice']) {
+                    if ($price === null) {
+                        throw new InvalidOrder($this->id . " createOrder()
+                            requires the $price argument with market buy orders
+                            to calculate total order cost ($amount to spend),
+                            where cost = $amount * $price-> Supply a $price
+                            argument to createOrder() call if you want the cost
+                            to be calculated for you from $price and $amount,
+                            or, alternatively, add
+                            .options['createMarketBuyOrderRequiresPrice'] =
+                            false to supply the cost in the $amount argument
+                            (the exchange-specific behaviour)");
+                    } else {
+                        $amount = $amount * $price;
+                    }
+                }
+            }
         }
 
         $market = $this->getBacktestMarket($symbol);
         $baseWallet = $this->getBacktestWallet($backtestMarket->getBase());
         $quoteWallet = $this->getBacktestWallet($backtestMarket->getQuote());
 
-        // @TODO consider a factory when we start supporting different order
-        // types
-        $order = new LimitOrder($market, $quoteWallet, $baseWallet, $symbol, $side, $amount, $price, $params);
+        // If It's a limit buy/sell above/below the current price, execute a
+        // marketorder instead
+        if ($type === 'limit') {
+            // @TODO allow customization of currentPrice
+            $currentPrice = $market->getCandleClose();
+            if (($side == 'buy' && $currentPrice < $price) || ($side == 'sell' && $currentPrice > $price)) {
+                $type = 'market';
+                $price = null;
+            }
+        }
+
+        $order = $this->orderFactory->build(
+            $type,
+            $market,
+            $quoteWallet,
+            $baseWallet,
+            $symbol,
+            $side,
+            $amount,
+            $price,
+            $params
+        );
 
         $this->backtestOrders[$order->getId()] = $order;
 
         return $this->parseOrder($order);
     }
 
-    public function fetch_markets($params = array())
+    public function fetchMarkets($params = array())
     {
         $results = array();
         foreach ($this->backtestMarkets as $market) {
@@ -269,6 +326,12 @@ class BacktestExchange extends Exchange
         return $results;
     }
 
+    //phpcs:ignore
+    public function fetch_markets($params = array())
+    {
+        return $this->fetchMarkets($params);
+    }
+
     public function fetchOHLCV($symbol, $timeframe = 'default', $since = null, $limit = null, $params = array ())
     {
         throw new NotSupported($this->id . ' API does not support fetchOHLCV');
@@ -277,10 +340,12 @@ class BacktestExchange extends Exchange
     /**
      * increment
      *
+     * Move all markets forward by one candle
      *
-     * @return void
-     * @throws [ExceptionClass] [Description]
-     * @access
+     * @param int $count
+     *
+     * @return bool
+     * @access public
      */
     public function increment($count = 1)
     {
@@ -299,16 +364,6 @@ class BacktestExchange extends Exchange
         // Now calculate any triggered orders and update wallet values
         $this->processBacktestOrders();
         return $success;
-    }
-
-    public function __call($name, $args = array())
-    {
-        $name = str_replace('_', '', ucwords($name, '_'));
-        if (method_exists($this, $name)) {
-            return call_user_func_array($name, $args);
-        }
-
-        throw new NotSupported($this->id . ' API does not support '.$name);
     }
 
     public function fetchBalance($params = array())
@@ -360,6 +415,11 @@ class BacktestExchange extends Exchange
         return $this->backtestOrders[$id];
     }
 
+    public function getBacktestMarkets()
+    {
+        return $this->backtestMarkets;
+    }
+
     public function getBacktestMarket($symbol)
     {
         return $this->backtestMarkets[$symbol];
@@ -381,5 +441,32 @@ class BacktestExchange extends Exchange
     public function getBacktestOrders()
     {
         return $this->backtestOrders;
+    }
+
+
+    /**
+     * __call
+     *
+     * @NOTE Starting to think use camel instead of case to override
+     * CCXT/Exchange methods was a bad idea... may have to switch it back :/
+     *
+     * @param mixed $name
+     * @param array $args
+     *
+     * @return void
+     * @throws [ExceptionClass] [Description]
+     * @access
+     */
+    public function __call($name, $args = array())
+    {
+        $camelName = str_replace('_', '', ucwords($name, '_'));
+        if (method_exists($this, $camelName)) {
+            return call_user_func_array($this->$camelName, $args);
+        }
+        if (method_exists($this, $name)) {
+            return call_user_func_array($this->$name, $args);
+        }
+
+        return parent::__call($name, $args);
     }
 }
