@@ -1,5 +1,5 @@
 {
-    "name": "flickerbean/ccxt-backtest",
+    "name": "flickerbean/ccxt-php-backtest",
     "description": "PHP CCXT Backtesting library",
     "type": "library",
     "require": {
