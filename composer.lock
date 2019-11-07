@@ -4,31 +4,29 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "bb3ecf698b275dc52a0d77d7142fe7ad",
+    "content-hash": "e0bdbf5ad7bdb6f907f2e8314eeb067c",
     "packages": [
         {
             "name": "ccxt/ccxt",
-            "version": "1.18.491",
+            "version": "1.19.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ccxt/ccxt.git",
-                "reference": "396007a709083bfa380a4363aa601d55e4c8847f"
+                "reference": "fefd8a55d67c5f427b5315c13ecf05564a39b1f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ccxt/ccxt/zipball/396007a709083bfa380a4363aa601d55e4c8847f",
-                "reference": "396007a709083bfa380a4363aa601d55e4c8847f",
+                "url": "https://api.github.com/repos/ccxt/ccxt/zipball/fefd8a55d67c5f427b5315c13ecf05564a39b1f0",
+                "reference": "fefd8a55d67c5f427b5315c13ecf05564a39b1f0",
                 "shasum": ""
             },
             "require": {
                 "ext-bcmath": "*",
                 "ext-curl": "*",
-                "ext-gmp": "*",
                 "ext-iconv": "*",
+                "ext-json": "*",
+                "ext-openssl": "*",
                 "ext-pcre": "*",
-                "kornrunner/ethereum-util": "0.0.3",
-                "kornrunner/secp256k1": "0.1.0",
-                "kornrunner/solidity": "0.1.2",
                 "pear/console_table": "1.3.1",
                 "php": ">=5.4.0",
                 "symfony/polyfill-mbstring": "^1.7"
@@ -40,7 +38,10 @@
             "autoload": {
                 "psr-4": {
                     "ccxt\\": "php/"
-                }
+                },
+                "files": [
+                    "ccxt.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -58,6 +59,12 @@
                     "email": "rocket.mind@gmail.com",
                     "homepage": "https://github.com/xpl",
                     "role": "Developer"
+                },
+                {
+                    "name": "Carlo Revelli",
+                    "email": "carlo.revelli@berkeley.edu",
+                    "homepage": "https://github.com/frosty00",
+                    "role": "Junior Developer"
                 }
             ],
             "description": "A JavaScript / Python / PHP cryptocurrency trading library with support for more than 90 bitcoin/altcoin exchanges",
@@ -97,7 +104,6 @@
                 "CoinSpot",
                 "Coinsecure",
                 "Crypto Capital",
-                "Cryptopia",
                 "DOGE",
                 "EUR",
                 "EXMO",
@@ -184,7 +190,6 @@
                 "crypto market",
                 "cryptocapital.co",
                 "cryptocurrency",
-                "cryptopia.co.nz",
                 "currencies",
                 "currency",
                 "darkcoin",
@@ -267,76 +272,7 @@
                 "zec",
                 "zerocoin"
             ],
-            "time": "2019-04-26T04:44:59+00:00"
-        },
-        {
-            "name": "fgrosse/phpasn1",
-            "version": "v2.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/fgrosse/PHPASN1.git",
-                "reference": "7ebf2a09084a7bbdb7b879c66fdf7ad80461bbe8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/fgrosse/PHPASN1/zipball/7ebf2a09084a7bbdb7b879c66fdf7ad80461bbe8",
-                "reference": "7ebf2a09084a7bbdb7b879c66fdf7ad80461bbe8",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.0.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~6.3",
-                "satooshi/php-coveralls": "~2.0"
-            },
-            "suggest": {
-                "ext-gmp": "GMP is the preferred extension for big integer calculations",
-                "php-curl": "For loading OID information from the web if they have not bee defined statically"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "FG\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Friedrich Große",
-                    "email": "friedrich.grosse@gmail.com",
-                    "homepage": "https://github.com/FGrosse",
-                    "role": "Author"
-                },
-                {
-                    "name": "All contributors",
-                    "homepage": "https://github.com/FGrosse/PHPASN1/contributors"
-                }
-            ],
-            "description": "A PHP Framework that allows you to encode and decode arbitrary ASN.1 structures using the ITU-T X.690 Encoding Rules.",
-            "homepage": "https://github.com/FGrosse/PHPASN1",
-            "keywords": [
-                "DER",
-                "asn.1",
-                "asn1",
-                "ber",
-                "binary",
-                "decoding",
-                "encoding",
-                "x.509",
-                "x.690",
-                "x509",
-                "x690"
-            ],
-            "time": "2018-12-02T01:34:34+00:00"
+            "time": "2019-11-07T06:13:18+00:00"
         },
         {
             "name": "ghunti/highcharts-php",
@@ -383,257 +319,6 @@
                 "php"
             ],
             "time": "2016-01-24T11:57:43+00:00"
-        },
-        {
-            "name": "kornrunner/ethereum-util",
-            "version": "0.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kornrunner/php-ethereum-util.git",
-                "reference": "2068474206bcb94c976f094c4c8bf7e64f6cf20b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kornrunner/php-ethereum-util/zipball/2068474206bcb94c976f094c4c8bf7e64f6cf20b",
-                "reference": "2068474206bcb94c976f094c4c8bf7e64f6cf20b",
-                "shasum": ""
-            },
-            "require": {
-                "kornrunner/keccak": "^1.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.5",
-                "satooshi/php-coveralls": "^1.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "kornrunner\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Boris Momcilovic",
-                    "homepage": "https://github.com/kornrunner/php-ethereum-util"
-                }
-            ],
-            "description": "Pure PHP implementation of Ethereum Utils",
-            "keywords": [
-                "ethereum"
-            ],
-            "time": "2017-12-08T00:21:20+00:00"
-        },
-        {
-            "name": "kornrunner/keccak",
-            "version": "1.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kornrunner/php-keccak.git",
-                "reference": "ad761f528f4d1e3ce378b8a0841e5f82c9973535"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kornrunner/php-keccak/zipball/ad761f528f4d1e3ce378b8a0841e5f82c9973535",
-                "reference": "ad761f528f4d1e3ce378b8a0841e5f82c9973535",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1.0",
-                "symfony/polyfill-mbstring": "^1.8"
-            },
-            "require-dev": {
-                "php-coveralls/php-coveralls": "^2.1",
-                "phpunit/phpunit": "~7"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "kornrunner\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Boris Momcilovic",
-                    "homepage": "https://github.com/kornrunner/php-keccak"
-                }
-            ],
-            "description": "Pure PHP implementation of Keccak",
-            "keywords": [
-                "keccak",
-                "sha-3",
-                "sha3-256"
-            ],
-            "time": "2018-07-30T22:16:23+00:00"
-        },
-        {
-            "name": "kornrunner/secp256k1",
-            "version": "0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kornrunner/php-secp256k1.git",
-                "reference": "e25345edd9bbe25ebeb744bdb772cd904d9e3998"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kornrunner/php-secp256k1/zipball/e25345edd9bbe25ebeb744bdb772cd904d9e3998",
-                "reference": "e25345edd9bbe25ebeb744bdb772cd904d9e3998",
-                "shasum": ""
-            },
-            "require": {
-                "ext-gmp": "*",
-                "mdanter/ecc": "~0.5",
-                "php": ">=7.1"
-            },
-            "require-dev": {
-                "php-coveralls/php-coveralls": "^2.1",
-                "phpunit/phpunit": "~6.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "kornrunner\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Boris Momčilović",
-                    "email": "boris.momcilovic@gmail.com"
-                }
-            ],
-            "description": "Puse PHP secp256k1",
-            "time": "2018-06-11T20:43:37+00:00"
-        },
-        {
-            "name": "kornrunner/solidity",
-            "version": "0.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kornrunner/php-solidity.git",
-                "reference": "12a2af6920d24ab52b683dfbbaaf3892cbf9bd22"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kornrunner/php-solidity/zipball/12a2af6920d24ab52b683dfbbaaf3892cbf9bd22",
-                "reference": "12a2af6920d24ab52b683dfbbaaf3892cbf9bd22",
-                "shasum": ""
-            },
-            "require": {
-                "ext-mbstring": "*",
-                "kornrunner/keccak": "^1.0",
-                "php": ">=7.1.0",
-                "simplito/bn-php": "^1.0"
-            },
-            "require-dev": {
-                "php-coveralls/php-coveralls": "^2.1",
-                "phpunit/phpunit": "~7"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "kornrunner\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Boris Momcilovic",
-                    "homepage": "https://github.com/kornrunner/php-solidity"
-                }
-            ],
-            "description": "Pure PHP implementation of Solidity",
-            "keywords": [
-                "eth",
-                "ethereum",
-                "solidity"
-            ],
-            "time": "2018-07-30T10:27:16+00:00"
-        },
-        {
-            "name": "mdanter/ecc",
-            "version": "v0.5.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phpecc/phpecc.git",
-                "reference": "b95f25cc1bacc83a9f0ccd375900b7cfd343029e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phpecc/phpecc/zipball/b95f25cc1bacc83a9f0ccd375900b7cfd343029e",
-                "reference": "b95f25cc1bacc83a9f0ccd375900b7cfd343029e",
-                "shasum": ""
-            },
-            "require": {
-                "ext-gmp": "*",
-                "fgrosse/phpasn1": "^2.0",
-                "php": "^7.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.0",
-                "squizlabs/php_codesniffer": "^2.0",
-                "symfony/yaml": "^2.6|^3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Mdanter\\Ecc\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Matyas Danter",
-                    "homepage": "http://matejdanter.com/",
-                    "role": "Author"
-                },
-                {
-                    "name": "Thibaud Fabre",
-                    "email": "thibaud@aztech.io",
-                    "homepage": "http://aztech.io",
-                    "role": "Maintainer"
-                },
-                {
-                    "name": "Thomas Kerin",
-                    "email": "afk11@users.noreply.github.com",
-                    "role": "Maintainer"
-                }
-            ],
-            "description": "PHP Elliptic Curve Cryptography library",
-            "homepage": "https://github.com/phpecc/phpecc",
-            "keywords": [
-                "Diffie",
-                "ECDSA",
-                "Hellman",
-                "curve",
-                "ecdh",
-                "elliptic",
-                "nistp192",
-                "nistp224",
-                "nistp256",
-                "nistp384",
-                "nistp521",
-                "phpecc",
-                "secp256k1",
-                "secp256r1"
-            ],
-            "time": "2018-12-03T18:17:01+00:00"
         },
         {
             "name": "pear/console_table",
@@ -691,91 +376,17 @@
             "time": "2018-01-25T20:47:17+00:00"
         },
         {
-            "name": "simplito/bigint-wrapper-php",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/simplito/bigint-wrapper-php.git",
-                "reference": "cf21ec76d33f103add487b3eadbd9f5033a25930"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/simplito/bigint-wrapper-php/zipball/cf21ec76d33f103add487b3eadbd9f5033a25930",
-                "reference": "cf21ec76d33f103add487b3eadbd9f5033a25930",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "BI\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Simplito Team",
-                    "email": "s.smyczynski@simplito.com",
-                    "homepage": "https://simplito.com"
-                }
-            ],
-            "description": "Common interface for php_gmp and php_bcmath modules",
-            "time": "2018-02-27T12:38:08+00:00"
-        },
-        {
-            "name": "simplito/bn-php",
-            "version": "1.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/simplito/bn-php.git",
-                "reference": "e852fcd27e4acbc32459606d7606e45a85e42465"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/simplito/bn-php/zipball/e852fcd27e4acbc32459606d7606e45a85e42465",
-                "reference": "e852fcd27e4acbc32459606d7606e45a85e42465",
-                "shasum": ""
-            },
-            "require": {
-                "simplito/bigint-wrapper-php": "~1.0.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "BN\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Simplito Team",
-                    "email": "s.smyczynski@simplito.com",
-                    "homepage": "https://simplito.com"
-                }
-            ],
-            "description": "Big number implementation compatible with bn.js",
-            "time": "2018-04-12T11:07:43+00:00"
-        },
-        {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.11.0",
+            "version": "v1.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "fe5e94c604826c35a32fa832f35bd036b6799609"
+                "reference": "b42a2f66e8f1b15ccf25652c3424265923eb4f17"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/fe5e94c604826c35a32fa832f35bd036b6799609",
-                "reference": "fe5e94c604826c35a32fa832f35bd036b6799609",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/b42a2f66e8f1b15ccf25652c3424265923eb4f17",
+                "reference": "b42a2f66e8f1b15ccf25652c3424265923eb4f17",
                 "shasum": ""
             },
             "require": {
@@ -787,7 +398,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.11-dev"
+                    "dev-master": "1.12-dev"
                 }
             },
             "autoload": {
@@ -821,7 +432,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-02-06T07:57:58+00:00"
+            "time": "2019-08-06T08:03:45+00:00"
         }
     ],
     "packages-dev": [],
