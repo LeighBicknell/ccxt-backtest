@@ -27,22 +27,23 @@ class BacktestExchange extends Exchange
      * @throws [ExceptionClass] [Description]
      * @access
      */
-    public function setBacktestMarkets(array $markets)
+    public function setBacktestMarkets(iterable $markets)
     {
         foreach ($markets as $k => $market) {
             $this->backtestMarkets[$market->getSymbol()] = $market;
         }
     }
 
-    public function setBacktestWallets(array $wallets)
+    public function setBacktestWallets(iterable $wallets)
     {
         foreach ($wallets as $k => $wallet) {
             $this->backtestWallets[$wallet->getName()] = $wallet;
         }
     }
 
-    public function describe() {
-        return array_replace_recursive (parent::describe (), array (
+    public function describe()
+    {
+        return array_replace_recursive(parent::describe(), array(
             'id' => 'backtest',
             'name' => 'BacktestExchange',
             'countries' => array ('US'),
@@ -144,19 +145,19 @@ class BacktestExchange extends Exchange
         $average = null;
         if ($last !== null && $open !== null) {
             $change = $last - $open;
-            $average = $this->sum ($last, $open) / 2;
-            if ($open > 0)
+            $average = $this->sum($last, $open) / 2;
+            if ($open > 0) {
                 $percentage = $change / $open * 100;
+            }
         }
         $vwap = null;
-        if ($quoteVolume !== null)
-            if ($baseVolume !== null)
-                if ($baseVolume > 0)
-                    $vwap = $quoteVolume / $baseVolume;
+        if ($quoteVolume !== null && $baseVolume !== null && $baseVolume > 0) {
+            $vwap = $quoteVolume / $baseVolume;
+        }
         return array (
             'symbol' => $symbol,
             'timestamp' => $timestamp,
-            'datetime' => $this->iso8601 ($timestamp),
+            'datetime' => $this->iso8601($timestamp),
             'high' => $this->safe_float($ticker, 'high'),
             'low' => $this->safe_float($ticker, 'low'),
             'bid' => $this->safe_float($ticker, 'bid'),
@@ -221,8 +222,7 @@ class BacktestExchange extends Exchange
      * @param array $params
      *
      * @return void
-     * @throws [ExceptionClass] [Description]
-     * @access
+     * @access public
      */
     public function createOrder($symbol, $type, $side, $amount, $price = null, $params = array())
     {
@@ -250,7 +250,7 @@ class BacktestExchange extends Exchange
         return $this->parseOrder($order);
     }
 
-    public function fetch_markets($params = array())
+    public function fetchMarkets($params = array())
     {
         $results = array();
         foreach ($this->backtestMarkets as $market) {
@@ -269,6 +269,12 @@ class BacktestExchange extends Exchange
         return $results;
     }
 
+    //phpcs:ignore
+    public function fetch_markets($params = array())
+    {
+        return $this->fetchMarkets($params);
+    }
+
     public function fetchOHLCV($symbol, $timeframe = 'default', $since = null, $limit = null, $params = array ())
     {
         throw new NotSupported($this->id . ' API does not support fetchOHLCV');
@@ -277,10 +283,12 @@ class BacktestExchange extends Exchange
     /**
      * increment
      *
+     * Move all markets forward by one candle
      *
-     * @return void
-     * @throws [ExceptionClass] [Description]
-     * @access
+     * @param int $count
+     *
+     * @return bool
+     * @access public
      */
     public function increment($count = 1)
     {
@@ -299,16 +307,6 @@ class BacktestExchange extends Exchange
         // Now calculate any triggered orders and update wallet values
         $this->processBacktestOrders();
         return $success;
-    }
-
-    public function __call($name, $args = array())
-    {
-        $name = str_replace('_', '', ucwords($name, '_'));
-        if (method_exists($this, $name)) {
-            return call_user_func_array($name, $args);
-        }
-
-        throw new NotSupported($this->id . ' API does not support '.$name);
     }
 
     public function fetchBalance($params = array())
@@ -360,6 +358,11 @@ class BacktestExchange extends Exchange
         return $this->backtestOrders[$id];
     }
 
+    public function getBacktestMarkets()
+    {
+        return $this->backtestMarkets;
+    }
+
     public function getBacktestMarket($symbol)
     {
         return $this->backtestMarkets[$symbol];
@@ -381,5 +384,32 @@ class BacktestExchange extends Exchange
     public function getBacktestOrders()
     {
         return $this->backtestOrders;
+    }
+
+
+    /**
+     * __call
+     *
+     * @NOTE Starting to think use camel instead of case to override
+     * CCXT/Exchange methods was a bad idea... may have to switch it back :/
+     *
+     * @param mixed $name
+     * @param array $args
+     *
+     * @return void
+     * @throws [ExceptionClass] [Description]
+     * @access
+     */
+    public function __call($name, $args = array())
+    {
+        $camelName = str_replace('_', '', ucwords($name, '_'));
+        if (method_exists($this, $camelName)) {
+            return call_user_func_array($this->$camelName, $args);
+        }
+        if (method_exists($this, $name)) {
+            return call_user_func_array($this->$name, $args);
+        }
+
+        return parent::__call($name, $args);
     }
 }

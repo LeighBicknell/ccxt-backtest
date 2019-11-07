@@ -40,7 +40,6 @@ class LimitOrder extends Order
 
     protected function processBuy()
     {
-        $candle = $this->market->getCandle();
 
         // @TODO come up with a better way of customizing this logic without
         // having to extend our Orders once again
@@ -48,14 +47,11 @@ class LimitOrder extends Order
         // of the logic for us.
         // Or we could allow passing in of an executable that contains the
         // logic. Or maybe something else.
-        if ($this->market->getCandleLow() >= $this->getPrice()) {
 
+        $candle = $this->market->getCandle();
+        if ($this->market->getCandleLow() >= $this->getPrice()) {
             return false;
         }
-
-        // @FIXME If user creates a limit buy at a price way above the current
-        // market price, it is essentially just a market order, and should be
-        // filled at current price
 
         // If we got this far the order has been filled
         $this->setStatus('closed');
@@ -69,11 +65,6 @@ class LimitOrder extends Order
     protected function processSell()
     {
         $candle = $this->market->getCandle();
-        // @TODO come up with a better way of customizing this logic without
-        // having to extend our Orders once again
-        // of the logic for us.
-        // Or we could allow passing in of an executable that contains the
-        // logic. Or maybe something else.
         if ($this->market->getCandleHigh() <= $this->getPrice()) {
             return false;
         }
@@ -96,11 +87,11 @@ class LimitOrder extends Order
 
         $this->setStatus('cancelled');
         switch ($order->getSide()) {
-        case 'buy':
-            $this->quoteWallet->increment($order->getRemaining());
-            break;
-        case 'sell':
-            $this->baseWallet->increment($order->getRemaining());
+            case 'buy':
+                $this->quoteWallet->increment($order->getRemaining());
+                break;
+            case 'sell':
+                $this->baseWallet->increment($order->getRemaining());
         }
 
         return $this;
