@@ -406,7 +406,9 @@ class BacktestExchange extends Exchange
     {
         foreach ($this->backtestOrders as $k => $order) {
             $market = $this->getBacktestMarket($order->getSymbol());
-            $order->process();
+            if ($order->getStatus() == 'open') {
+                $order->process();
+            }
         }
     }
 
