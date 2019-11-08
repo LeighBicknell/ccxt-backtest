@@ -9,6 +9,13 @@ use Ghunti\HighchartsPHP\HighchartJsExpr;
 
 class ChartRenderer
 {
+    protected $series;
+
+    public function addSeries($data, $market)
+    {
+        $this->series[$market][] = $data;
+    }
+
     /**
      * render
      *
@@ -128,9 +135,14 @@ class ChartRenderer
             'onSeries' => 'ohlc',
             'allowOverlapX' => true
         ];
+        foreach ($this->series[$market->getSymbol()] as $v) {
+            $chart->series[] = $v;
+        }
 
         $container = '<div id="'.$chartId.'"></div>';
 
+        $chart->addExtraScript('indicators', '//code.highcharts.com/stock/indicators/', 'indicators.js');
+        $chart->includeExtraScripts(['indicators']);
         return $chart->printScripts(true).$container.$chart->render(null, null, true);
     }
 }

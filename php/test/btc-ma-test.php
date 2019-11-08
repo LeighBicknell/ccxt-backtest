@@ -15,11 +15,12 @@ $exchange->load_markets();
 $market = $exchange->markets['BTC/USD'];
 
 
-$ohlcvv = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('-600 days', strtotime('2019-01-01')) * 1000);
-$ohlcvv2 = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('-300 days', strtotime('2019-01-01')) * 1000);
-$ohlcvv3 = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('2019-01-01')*1000);
+$ohlcvv = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('-900 days', strtotime('2019-01-01')) * 1000);
+$ohlcvv2 = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('-600 days', strtotime('2019-01-01')) * 1000);
+$ohlcvv3 = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('-300 days', strtotime('2019-01-01')) * 1000);
+$ohlcvv4 = $exchange->fetch_ohlcv($market['symbol'], '1d', strtotime('2019-01-01')*1000);
 
-$ohlcvv = array_merge($ohlcvv, $ohlcvv2, $ohlcvv3);
+$ohlcvv = array_merge($ohlcvv, $ohlcvv2, $ohlcvv3, $ohlcvv4);
 
 // Load the data into our backtesting exchange
 $testMarkets[$market['symbol']] = MarketFactory::buildFromCCXTMarket($market, $ohlcvv);
@@ -37,16 +38,24 @@ $symbol = $market['symbol'];
 $tickers = [];
 $prices = [];
 $maLength = 100;
+// @TODO Switch this to market orders and just buy percentages
 $botOrders = [
     [
         'buyAt' => 0.9,
-        'sellAt' => 1.1,
-        'quantity' => 1,
+        'sellAt' => 1.5,
+        'quantity' => 0.5,
         'side' => 'buy',
         'id' => null
-    ]
+    ],
+    [
+        'buyAt' => 0.8,
+        'sellAt' => 2,
+        'quantity' => 0.5,
+        'side' => 'buy',
+        'id' => null
+    ],
 ];
-
+$maSeriesData = [];
 while ($continue) {
     // This should be the only backtest specific code in this loop:
     if (method_exists($exchange, 'increment')) {
@@ -65,14 +74,18 @@ while ($continue) {
         continue;
     }
     $ma = end($mas);
+    $maSeriesData[$ticker['timestamp']] = $ma;
 
     $funds = $exchange->fetchBalance();
-    foreach ($botOrders as &$botOrder) {
+    foreach ($botOrders as $k => &$botOrder) {
         if ($botOrder['id']) {
             $order = $exchange->fetchOrder($botOrder['id']);
 
             // Check if the order has been filled
             if ($order['status'] == 'closed') {
+
+                echo $k.' '.$botOrder['side'].' '.$order['amount'].' '.$order['price']."<br/>";
+
                 // The order has succeeded
                 // Clear the id
                 $botOrder['id'] = null;
@@ -89,6 +102,8 @@ while ($continue) {
                 $botOrder['id'] = null;
             }
         }
+        // @FIXME there's a bug somewhere in the order logic, we're selling
+        // more BTC than we ever bought!
         if (!$botOrder['id']) {
             $side = $botOrder['side'];
             $rate = $botOrder['buyAt'] * $ma;
@@ -100,10 +115,9 @@ while ($continue) {
             $wallet = $market[$quoteBase];
             // We subtract 1 from our wallet because of rounding issues
             $quantity = ($funds[$wallet]['total'] - 0.01) * $botOrder['quantity'];
-            if ($quantity < $funds[$wallet]['free']) {
-                $quantity = $funds[$wallet]['free'] - 0.01;
+            if ($botOrder['side'] == 'buy') {
+                $quantity = round($quantity / $rate, 6, PHP_ROUND_HALF_DOWN);
             }
-            $quantity = round($quantity / $rate, 6, PHP_ROUND_HALF_DOWN);
 
             $order = $exchange->createOrder($symbol, 'limit', $botOrder['side'], $quantity, $rate);
             $botOrder['id'] = $order['id'];
@@ -112,6 +126,14 @@ while ($continue) {
 }
 
 $chartRenderer = new ChartRenderer();
+$maSeries = [
+    //'data' => $maSeriesData,
+    'type' => 'sma',
+    'name' => '100 SMA',
+    'linkedTo' => 'ohlc',
+    'params' => ['period' => 100]
+];
+$chartRenderer->addSeries($maSeries, $market['symbol']);
 
 ?>
 <html>
