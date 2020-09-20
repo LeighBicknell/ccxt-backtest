@@ -27,13 +27,15 @@ class ChartRenderer
     public function render(BacktestExchange $exchange)
     {
         $charts = '';
+        $scripts = true;
         foreach ($exchange->getBacktestMarkets() as $market) {
-            $charts.= $this->renderMarket($exchange, $market);
+            $charts.= $this->renderMarket($exchange, $market, $scripts);
+            $scripts = false;
         }
         return $charts;
     }
 
-    protected function renderMarket(BacktestExchange $exchange, Market $market)
+    protected function renderMarket(BacktestExchange $exchange, Market $market, $scripts = true)
     {
         // Fetch the candles
         $ohlcvv = $market->getOhlcvv();
@@ -141,8 +143,8 @@ class ChartRenderer
 
         $container = '<div id="'.$chartId.'"></div>';
 
-        $chart->addExtraScript('indicators', '//code.highcharts.com/stock/indicators/', 'indicators.js');
+        $chart->addExtraScript('indicators', 'https://code.highcharts.com/stock/indicators/', 'indicators.js');
         $chart->includeExtraScripts(['indicators']);
-        return $chart->printScripts(true).$container.$chart->render(null, null, true);
+        return $chart->printScripts($scripts).$container.$chart->render(null, null, true);
     }
 }
