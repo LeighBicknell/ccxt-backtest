@@ -264,7 +264,6 @@ class BacktestExchange extends Exchange
             var_dump($this->backtestOrders[$id]);
             echo "</pre>\r\n";
             die();
-
         }
         $order->cancel();
         return $this->parseOrder($order);
@@ -344,6 +343,15 @@ class BacktestExchange extends Exchange
 
         $parsedOrder = $this->parseOrder($order);
         return $parsedOrder;
+    }
+
+
+    public function createLimitBuyOrder($symbol, $amount, $price, $params = array()) {
+        return $this->createOrder($symbol, 'limit', 'buy', $amount, $price, $params);
+    }
+
+    public function createLimitSellOrder($symbol, $amount, $price, $params = array()) {
+        return $this->createOrder($symbol, 'limit', 'sell', $amount, $price, $params);
     }
 
     public function fetchMarkets($params = array())
