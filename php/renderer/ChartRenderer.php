@@ -9,6 +9,13 @@ use Ghunti\HighchartsPHP\HighchartJsExpr;
 
 class ChartRenderer
 {
+    protected $series;
+
+    public function addSeries($data, $market)
+    {
+        $this->series[$market][] = $data;
+    }
+
     /**
      * render
      *
@@ -46,9 +53,11 @@ class ChartRenderer
         }
 
         // Structure the orders data
-        $orders = [];
+        $orders = ['buy' => [], 'sell' => []];
         foreach ($exchange->getBacktestOrders() as $order) {
-            if ($order->getMarket() == $market) {
+
+
+            if ($order->getMarket() == $market && $order->getStatus() == 'closed') {
                 $orders[$order->getSide()][] = [
                     'x' => $order->getLastTradeTimestamp(),
                     'title' => $order->getSide(),
@@ -58,13 +67,14 @@ class ChartRenderer
                 ];
             }
         }
+
+
         usort($orders['buy'], function ($a, $b) {
             return $a['x'] - $b['x'];
         });
         usort($orders['sell'], function ($a, $b) {
             return $a['x'] - $b['x'];
         });
-
 
 
 
@@ -125,9 +135,14 @@ class ChartRenderer
             'onSeries' => 'ohlc',
             'allowOverlapX' => true
         ];
+        foreach ($this->series[$market->getSymbol()] as $v) {
+            $chart->series[] = $v;
+        }
 
         $container = '<div id="'.$chartId.'"></div>';
 
+        $chart->addExtraScript('indicators', '//code.highcharts.com/stock/indicators/', 'indicators.js');
+        $chart->includeExtraScripts(['indicators']);
         return $chart->printScripts(true).$container.$chart->render(null, null, true);
     }
 }

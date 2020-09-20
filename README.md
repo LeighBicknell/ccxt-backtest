@@ -35,10 +35,28 @@ The orders will then be checked, and adjusted based on new price, and funds in
 wallets re-calculated.
 
 
-It's worth noting that for now we need to use camelCase methods and not 
+**It's worth noting that for now we need to use camelCase methods and not 
 snake_case. snake_case methods will call the methods on the parent ccxt `Exchange` 
-class that `BacktestingExchange` extends.
+class that `BacktestingExchange` extends and as such not actually work.**
 
 ## Examples
 
 See `test/test.php`
+
+
+## TODO
+
+### Seperate CCXT Exchange implementation and actual 'Fake Exchange' logic.
+
+At the moment `BacktestExchange` has two jobs...
+
+One to implement a ccxt/Exchange.
+
+Two to actually act as a 'fake' exchange.
+
+These should be seperated, so that Exchanges public interface matches that of a 
+ccxt/Exchange.
+
+We can then add a `BacktestExchange::getFakeExchange()` method, allowing us to 
+access historical data for charting/debugging etc, while preventing 
+accidentally using none ccxt methods in our actual backtests.

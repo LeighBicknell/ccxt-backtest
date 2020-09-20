@@ -36,7 +36,6 @@ abstract class Order
     protected $amount;
     protected $cost;
     protected $filled;
-    protected $remaining;
     protected $fee;
     protected $quoteWallet;
     protected $baseWallet;
@@ -59,8 +58,8 @@ abstract class Order
         $this->baseWallet = &$baseWallet;
         $this->setSymbol($symbol);
         $this->setSide($side);
-        $this->setAmount($amount);
-        $this->setPrice($price);
+        $this->setAmount(round($amount, 8));
+        $this->setPrice(round($price, 8));
         $this->init();
     }
 
@@ -403,21 +402,7 @@ abstract class Order
      */
     public function getRemaining()
     {
-        return $this->remaining;
-    }
-
-    /**
-     * Setter for remaining
-     *
-     * @param mixed $remaining Set $remaining
-     *
-     * @return self
-     * @access public
-     */
-    public function setRemaining($remaining)
-    {
-        $this->remaining = $remaining;
-        return $this;
+        return $this->getAmount() - $this->getFilled();
     }
 
     /**
