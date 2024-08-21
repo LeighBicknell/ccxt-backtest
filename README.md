@@ -1,3 +1,5 @@
+# This is now Abandonware, I do not have time to work on it.
+
 # CCXT Backtesting library
 
 This is very much a work in progress and not yet ready for use. It was very 
